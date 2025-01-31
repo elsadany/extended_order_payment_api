@@ -30,4 +30,18 @@ class AuthController extends Controller
     $data = $this->user_service->register($request->getData());
     return apiResponse()->data(data: $data, message: 'Registered Successfully');
   }
+  
+  function me(){
+    $data = $this->user_service->me();
+
+    return apiResponse()->data(data: $data, message: 'returned Successfully');
+
+  }
+
+  function logout(){
+    $data = $this->user_service->logout();
+
+    return apiResponse()->data(data: null, message: 'logged out Successfully');
+
+  }
 }

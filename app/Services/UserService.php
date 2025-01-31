@@ -17,7 +17,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
             
         ]);
         return [
-            'token'    => JWTAuth::fromUser($user)
+            'token'    => JWTAuth::fromUser($user),
+            'user' => new UserResource($user)
         ];
     }
 
@@ -30,7 +31,20 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
         return [
             'token' => $token,
-            'user' => JWTAuth::fromUser(auth()->user())
+            'user' => new UserResource(auth()->user())
+        ];
+    }
+
+    
+    public function logout(): void
+    {
+        JWTAuth::invalidate(JWTAuth::getToken());
+    }
+
+    public function me()
+    {
+        return [
+            'user' => new UserResource(auth()->user())
         ];
     }
  }
