@@ -42,16 +42,16 @@ class PaymentTest extends TestCase
                 ],
             ],
         ];
-        $order_response =$this->withHeaders([
+        $order_response = $this->withHeaders([
             'Authorization' => 'Bearer ' . JWTAuth::fromUser($user)
         ])->postJson('/api/v1/orders', $order_data);
-            $payment_data =[
-                'payment_method' => Arr::random(array_column(PaymentGatewaysEnum::cases(),'value'))
-            ];
+        $payment_data = [
+            'payment_method' => Arr::random(array_column(PaymentGatewaysEnum::cases(), 'value'))
+        ];
         // Send a POST request to the API endpoint
-        $response =$this->withHeaders([
+        $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . JWTAuth::fromUser($user)
-        ])->postJson('/api/v1/payments/store/'.$order_response->json()['data']['data']['id'], $payment_data);
+        ])->postJson('/api/v1/payments/store/' . $order_response->json()['data']['data']['id'], $payment_data);
 
         $response->assertStatus(200);
     }

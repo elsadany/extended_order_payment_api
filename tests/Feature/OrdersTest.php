@@ -26,7 +26,7 @@ class OrdersTest extends TestCase
 
     public function test_create_order(): void
     {
-         $order_data = [
+        $order_data = [
             'user_name' => $this->faker->name,
             'user_email' => $this->faker->unique()->safeEmail,
             'items' => [
@@ -44,7 +44,7 @@ class OrdersTest extends TestCase
         ];
         $user = User::factory()->create();
         // Send a POST request to the API endpoint
-        $response =$this->withHeaders([
+        $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . JWTAuth::fromUser($user)
         ])->postJson('/api/v1/orders', $order_data);
 
