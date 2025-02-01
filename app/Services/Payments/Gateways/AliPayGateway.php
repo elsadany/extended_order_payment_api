@@ -20,8 +20,8 @@ class AliPayGateway implements PaymentGatewayInterface
     public function processPayment(Payment $payment)
     {
         // Simulate AliPay payment processing logic
-        $payment->payment_id = PaymentStatusEnum::SUCCESSFUL->value;; // Mock response
-        $payment->transaction_id = 'PP' . uniqid();
+        $payment->status = PaymentStatusEnum::SUCCESSFUL->value;; // Mock response
+        $payment->payment_id = 'AP-' . uniqid();
         $payment->save();
 
         return $payment;
