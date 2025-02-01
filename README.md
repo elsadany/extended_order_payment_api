@@ -1,66 +1,146 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# **Project Deployment Guide**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## **Installation and Deployment**
 
-## About Laravel
+Follow these steps to deploy the Laravel project:
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### **1. Clone the Project Repository**
+```bash
+git clone <repository_url>
+cd <project_directory>
+```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### **2. Install Dependencies**
+```bash
+composer install
+```
+Ensure that **Composer** is installed on your system before running the above command.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### **3. Configure Environment Variables**
+```bash
+cp .env.example .env
+```
+Then update the `.env` file with your **database credentials**, **mail settings**, and any other required configurations.
 
-## Learning Laravel
+### **4. Generate Application Key**
+```bash
+php artisan key:generate
+```
+### **5. Put DataBase name**
+```
+create new DB and put name and user,password in .env
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### **6. Run Database Migrations**
+```bash
+php artisan migrate
+```
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-## Laravel Sponsors
+### **7. Set JWT Secret Key** (For Authentication)
+```bash
+php artisan jwt:secret
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### **8. Run Automated Tests (Optional)**
+```bash
+php artisan test
+```
+Ensure that all tests pass before deployment.
 
-### Premium Partners
+### **9. Serve the Application Locally**
+```bash
+php artisan serve
+```
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## **API Documentation**
 
-## Contributing
+You can find the full API documentation here:
+[Postman Collection](https://documenter.getpostman.com/view/31707821/2sAYX3q3Ut)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## **Adding a New Payment Gateway**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+You can add a new **payment gateway** by following these steps:
 
-## Security Vulnerabilities
+### **1. Create a Payment Gateway Class**
+Create a new class for the payment gateway inside:
+```
+app/Services/Payments/Gateways/
+```
+Example (`StripeGateway.php`):
+```php
+namespace App\Services\Payments\Gateways;
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+use App\Models\Payment;
+use App\Services\Payments\PaymentGatewayInterface;
 
-## License
+class StripeGateway implements PaymentGatewayInterface
+{
+    protected $api_key;
+    protected $secret_key;
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+    function __construct()
+    {
+        $this->api_key = env('STIPE_API_KEY');
+        $this->secret_key = env('STRIPE_SECRET_KEY');
+    }
+
+    public function processPayment(Payment $payment)
+    {
+        // Implement Stripe API logic here
+        $payment->status = 'successful';
+        $payment->transaction_id = 'ST' . uniqid();
+        $payment->save();
+
+        return $payment;
+    }
+}
+```
+### **2. ADD the Keys to .env**
+```
+STIPE_API_KEY=
+STRIPE_SECRET_KEY=
+```
+### **3. Register the New Gateway in Factory**
+Edit the file:
+```
+app/Services/Payments/PaymentGatewayFactory.php
+```
+Add the new gateway inside the `create` method:
+```php
+public static function create(string $gateway): PaymentGatewayInterface
+{
+    return match ($gateway) {
+        'credit_card' => new CreditCardGateway(),
+        'paypal' => new PayPalGateway(),
+        'stripe' => new StripeGateway(), // Add new gateway here
+        default => throw new \Exception('Unsupported Payment Gateway'),
+    };
+}
+```
+
+### **3. Add to Enum File**
+Edit:
+```
+app/Enums/PaymentGatewaysEnum.php
+```
+Add the new payment gateway option:
+```php
+namespace App\Enums;
+
+enum PaymentGatewaysEnum: string
+{
+    case CREDIT_CARD = 'credit_card';
+    case PAYPAL = 'paypal';
+    case STRIPE = 'stripe'; // Add new gateway here
+}
+```
+
+Now, the new payment gateway is available for use!
+
+---
+
