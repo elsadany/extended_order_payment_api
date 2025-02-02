@@ -93,7 +93,7 @@ class StripeGateway implements PaymentGatewayInterface
     {
         // Implement Stripe API logic here
         $payment->status = 'successful';
-        $payment->transaction_id = 'ST' . uniqid();
+        $payment->payment_id = 'ST' . uniqid();
         $payment->save();
 
         return $payment;
